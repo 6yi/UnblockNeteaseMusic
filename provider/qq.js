@@ -1,4 +1,3 @@
-const zlib = require('zlib')
 const cache = require('../cache')
 const insure = require('./insure')
 const request = require('../request')
@@ -102,7 +101,7 @@ const ticket = () => {
 const track = id => {
 	return cache(ticket)
 	.then(vkey => {
-		let host = ['streamoc.music.tc.qq.com', 'isure.stream.qqmusic.qq.com', 'dl.stream.qqmusic.qq.com', '183.131.60.16/amobile.music.tc.qq.com'][0]
+		let host = ['streamoc.music.tc.qq.com', 'isure.stream.qqmusic.qq.com', 'dl.stream.qqmusic.qq.com', 'aqqmusic.tc.qq.com/amobile.music.tc.qq.com'][1]
 		let songUrl =
 			'http://' + host + '/M500' + id +
 			'.mp3?vkey=' + vkey +
@@ -121,7 +120,7 @@ const track = id => {
 	// )
 	// .then(response => response.body(true))
 	// .then(body => {
-	// 	let xml = zlib.inflateSync(body.slice(5)).toString()
+	// 	let xml = require('zlib').inflateSync(body.slice(5)).toString()
 	// 	let focus = xml.match(/<item name="(.+)">(.+)<\/item>/)
 	// 	return `http://streamoc.music.tc.qq.com/${focus[1]}?vkey=${focus[2]}&guid=0&uin=12345678&fromtag=6`
 	// })

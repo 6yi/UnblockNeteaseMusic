@@ -1,5 +1,6 @@
 const fs = require('fs')
 const net = require('net')
+const path = require('path')
 const parse = require('url').parse
 
 const hook = require('./hook')
@@ -51,7 +52,7 @@ const proxy = {
 		if(ctx.socket)
 			console.log('TUNNEL', mark, ctx.req.url)
 		else
-			console.log('MITM', mark, parse(ctx.req.url).host)
+			console.log('MITM', mark, parse(ctx.req.url).host, ctx.req.socket.encrypted ? '(ssl)' : '')
 	},
 	authenticate: ctx => {
 		const req = ctx.req
@@ -67,9 +68,9 @@ const proxy = {
 		}
 	},
 	filter: ctx => {
-		const url = parse(ctx.req.url)
+		const url = parse((ctx.socket ? 'https://' : '') + ctx.req.url)
 		const match = pattern => url.href.search(new RegExp(pattern, 'g')) != -1
-		if(!ctx.decision){
+		if(!(ctx.decision || ctx.req.local)){
 			try{
 				let allow = server.whitelist.some(match)
 				let deny = server.blacklist.some(match)
@@ -160,8 +161,8 @@ const proxy = {
 }
 
 const options = {
-	key: fs.readFileSync('./server.key'),
-	cert: fs.readFileSync('./server.crt')
+	key: fs.readFileSync(path.join(__dirname, 'server.key')),
+	cert: fs.readFileSync(path.join(__dirname, 'server.crt'))
 }
 
 const server = {
@@ -169,8 +170,8 @@ const server = {
 	https: require('https').createServer(options).on('request', proxy.core.mitm).on('connect', proxy.core.tunnel)
 }
 
-server.whitelist = ['.*']
-server.blacklist = ['.*']
+server.whitelist = []
+server.blacklist = ['//127\.\d+\.\d+\.\d+', '//localhost']
 server.authentication = null
 
 module.exports = server
